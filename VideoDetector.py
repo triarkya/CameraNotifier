@@ -4,12 +4,13 @@ import os
 
 
 class VideoDetector:
-    def __init__(self, identifier):
-        self.identifier = identifier
+    def __init__(self, filepath):
+        self.filepath = filepath
         self.video_detector = VideoObjectDetection()
         self.video_detector.setModelTypeAsYOLOv3()
         self.video_detector.setModelPath("yolo.h5")
         self.video_detector.loadModel()
+        self.converted_detection_path = ""
 
 
     def run_convert_avi(self, filepath):
@@ -32,34 +33,35 @@ class VideoDetector:
         os.remove(filepath)
 
 
-    def run_detection(self, filename):
+    def run_detection(self):
         custom_objects = self.video_detector.CustomObjects(
             car=True,
             person=True
         )
 
         new_path = self.video_detector.detectCustomObjectsFromVideo(
-            input_file_path=filename,
+            input_file_path=self.filepath,
             custom_objects=custom_objects,
             minimum_percentage_probability=40,
             log_progress=True,
-            output_file_path=filename + "detection"
+            output_file_path=self.filepath + "detection"
         )
 
         print(new_path)
 
 
-    def detect_and_convert(self, filename):
+    def detect_and_convert(self):
         # first detect from .avi file
-        self.run_detection(filename)
+        self.run_detection()
 
         # delete old video file
-        os.remove(filename)
+        os.remove(self.filepath)
 
         # convert detection file and remove non-detection file
-        self.run_convert_avi(filename + "detection.avi")
+        self.run_convert_avi(self.filepath + "detection.avi")
+        self.converted_detection_path = self.filepath + "detection.mp4"
 
 
 if __name__ == '__main__':
-    vd = VideoDetector("Outdoor")
-    vd.detect_and_convert("Videos/example_person_night.avi")
+    vd = VideoDetector("Videos/example_person_night.avi")
+    vd.detect_and_convert()
