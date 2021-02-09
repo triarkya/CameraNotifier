@@ -13,7 +13,11 @@ class VideoDetector:
         self.converted_detection_path = ""
 
 
-    def run_convert_avi(self, filepath):
+    """
+    converts .avi file to .mp4
+    optional: removes .avi file
+    """
+    def run_convert_avi(self, filepath, remove=False):
         converter = Converter()
 
         # first convert to mp4 and remove ".avi" between
@@ -29,22 +33,30 @@ class VideoDetector:
         for part in convert:
             print(part)
 
-        # then delete old file
-        os.remove(filepath)
+        if remove:
+            # then delete old file
+            os.remove(filepath)
 
 
+    """
+    run object detection on object filepath
+    currently: car/person
+    """
     def run_detection(self):
         custom_objects = self.video_detector.CustomObjects(
             car=True,
             person=True
         )
 
+        splitted_filepath = self.filepath.split("/")
+
+        # filepath for videofile with enabled object detection
         new_path = self.video_detector.detectCustomObjectsFromVideo(
             input_file_path=self.filepath,
             custom_objects=custom_objects,
             minimum_percentage_probability=40,
             log_progress=True,
-            output_file_path=self.filepath + "detection"
+            output_file_path=splitted_filepath[0] + "/converted/" + splitted_filepath[1] + "detection"
         )
 
         print(new_path)
@@ -55,13 +67,15 @@ class VideoDetector:
         self.run_detection()
 
         # delete old video file
-        os.remove(self.filepath)
+        # os.remove(self.filepath)
 
         # convert detection file and remove non-detection file
-        self.run_convert_avi(self.filepath + "detection.avi")
-        self.converted_detection_path = self.filepath + "detection.mp4"
+        splitted_filepath = self.filepath.split("/")
+        self.run_convert_avi(splitted_filepath[0] + "/converted/" + splitted_filepath[1] + "detection.avi", remove=True)
+        self.converted_detection_path = splitted_filepath[0] + "/converted/" + splitted_filepath[1] + "detection.mp4"
+        return self.converted_detection_path
 
 
 if __name__ == '__main__':
-    vd = VideoDetector("Videos/example_person_night.avi")
-    vd.detect_and_convert()
+    vd = VideoDetector("video.avi")
+    print(vd.detect_and_convert())
