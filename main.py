@@ -1,4 +1,5 @@
 import VideoDetector
+import Notification
 import os
 
 
@@ -17,8 +18,9 @@ if __name__ == '__main__':
 
     # run detection/conversion/notification for each asset file
     for asset in assets_files:
+        # run detection
         vd = VideoDetector.VideoDetector("assets/" + asset)
         final_file = vd.detect_and_convert()
-        print("finished", final_file)
 
         # send file and remove afterwards
+        Notification.send_notification(filepath=final_file)
