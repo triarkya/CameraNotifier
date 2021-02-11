@@ -1,6 +1,11 @@
 from imageai.Detection import VideoObjectDetection
 from converter import Converter
 import os
+import json
+
+
+with open("settings.json", "r") as settings:
+    detection_settings = settings["DetectionSettings"]
 
 
 class VideoDetector:
@@ -67,7 +72,8 @@ class VideoDetector:
         self.run_detection()
 
         # delete old video file
-        # os.remove(self.filepath)
+        if detection_settings["DeleteInitialFile"]:
+            os.remove(self.filepath)
 
         # convert detection file and remove non-detection file
         splitted_filepath = self.filepath.split("/")

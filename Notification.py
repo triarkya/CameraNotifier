@@ -22,5 +22,6 @@ def send_notification(filepath):
         print("Connection Error\n", e)
         print(traceback.format_exc())
 
+    # remove bot and converted file
     del tgb
     os.remove(filepath)
