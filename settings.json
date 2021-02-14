@@ -1,4 +1,7 @@
 {
+  "GeneralSettings": {
+    "root_directory": "/Users/CameraNotifier"
+  },
   "DetectionSettings": {
     "DeleteInitialFile": true
   },

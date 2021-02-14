@@ -5,7 +5,8 @@ import json
 
 
 with open("settings.json", "r") as settings:
-    detection_settings = settings["DetectionSettings"]
+    all_settings = json.load(settings)
+    detection_settings = all_settings["DetectionSettings"]
 
 
 class VideoDetector:
@@ -16,6 +17,8 @@ class VideoDetector:
         self.video_detector.setModelPath("yolo.h5")
         self.video_detector.loadModel()
         self.converted_detection_path = ""
+        self.to_find = ["car", "person"]
+        self.found = False
 
 
     """
@@ -48,20 +51,15 @@ class VideoDetector:
     currently: car/person
     """
     def run_detection(self):
-        custom_objects = self.video_detector.CustomObjects(
-            car=True,
-            person=True
-        )
-
         splitted_filepath = self.filepath.split("/")
 
         # filepath for videofile with enabled object detection
-        new_path = self.video_detector.detectCustomObjectsFromVideo(
+        new_path = self.video_detector.detectObjectsFromVideo(
             input_file_path=self.filepath,
-            custom_objects=custom_objects,
             minimum_percentage_probability=40,
             log_progress=True,
-            output_file_path=splitted_filepath[0] + "/converted/" + splitted_filepath[1] + "detection"
+            output_file_path="/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection",
+            per_frame_function=self.forFrame
         )
 
         print(new_path)
@@ -77,9 +75,17 @@ class VideoDetector:
 
         # convert detection file and remove non-detection file
         splitted_filepath = self.filepath.split("/")
-        self.run_convert_avi(splitted_filepath[0] + "/converted/" + splitted_filepath[1] + "detection.avi", remove=True)
-        self.converted_detection_path = splitted_filepath[0] + "/converted/" + splitted_filepath[1] + "detection.mp4"
+        self.run_convert_avi("/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.avi", remove=True)
+        self.converted_detection_path = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.mp4"
         return self.converted_detection_path
+
+
+    def forFrame(self, frame_number, output_array, output_count):
+        print("FOR FRAME ", frame_number)
+        if any(key in self.to_find for key in output_count.keys()):
+            print("FOUND")
+            self.found = True
+        print("------------END OF A FRAME --------------")
 
 
 if __name__ == '__main__':
