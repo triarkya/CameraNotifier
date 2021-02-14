@@ -12,7 +12,7 @@ with open("settings.json") as all_settings:
 
 def run_detection():
     # filter all remaining asset files
-    assets_files = os.listdir(general_settings["root_directory"] + "/assets")
+    assets_files = os.listdir(general_settings["root_directory"] + general_settings["assets_folder"])
     assets_files = sorted([asset for asset in assets_files if asset[-3:] == "avi"])
 
     if len(assets_files) == 0:
@@ -22,7 +22,9 @@ def run_detection():
         # run detection/conversion/notification for each asset file
         for asset in assets_files:
             # run detection
-            vd = VideoDetector.VideoDetector(general_settings["root_directory"] + "/assets/" + asset)
+            vd = VideoDetector.VideoDetector(
+                general_settings["root_directory"] + general_settings["assets_folder"] + "/" + asset
+            )
             final_file = vd.detect_and_convert()
 
             # send file and remove afterwards
@@ -34,12 +36,12 @@ def run_detection():
 
 if __name__ == '__main__':
     # create directory for assets to check
-    if not os.path.exists(general_settings["root_directory"] + "/assets"):
-        os.mkdir(general_settings["root_directory"] + "/assets")
+    if not os.path.exists(general_settings["root_directory"] + general_settings["assets_folder"]):
+        os.mkdir(general_settings["root_directory"] + general_settings["assets_folder"])
 
     # create directory for detection/conversion files
-    if not os.path.exists(general_settings["root_directory"] + "/assets/converted"):
-        os.mkdir(general_settings["root_directory"] + "/assets/converted")
+    if not os.path.exists(general_settings["root_directory"] + general_settings["assets_folder"] + "/converted"):
+        os.mkdir(general_settings["root_directory"] + general_settings["assets_folder"] + "/converted")
 
     while True:
         run_detection()
