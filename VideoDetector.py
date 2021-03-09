@@ -4,6 +4,7 @@ import os
 import json
 
 
+# Settings
 with open("settings.json", "r") as settings:
     all_settings = json.load(settings)
     detection_settings = all_settings["DetectionSettings"]
@@ -13,17 +14,18 @@ class VideoDetector:
     def __init__(self, filepath):
         self.filepath = filepath
         self.video_detector = VideoObjectDetection()
+
         self.video_detector.setModelTypeAsYOLOv3()
         self.video_detector.setModelPath("yolo.h5")
-        self.video_detector.loadModel()
+        self.video_detector.loadModel(detection_speed="fastest")
         self.converted_detection_path = ""
-        self.to_find = ["car", "person"]
+        self.to_find = ["person"]
         self.found = False
 
 
     """
     converts .avi file to .mp4
-    optional: removes .avi file
+    optional: removes .avi file after conversion
     """
     def run_convert_avi(self, filepath, remove=False):
         converter = Converter()
@@ -38,8 +40,14 @@ class VideoDetector:
                 'fps': 5
             }
         })
-        for part in convert:
-            print(part)
+        try:
+            for part in convert:
+                print(part)
+
+        except Exception as e:
+            print(e)
+            # add some additional verbose stuff/notification here
+            # sometimes converter.ConverterError: Zero-length media occurs
 
         if remove:
             # then delete old file
@@ -81,11 +89,9 @@ class VideoDetector:
 
 
     def forFrame(self, frame_number, output_array, output_count):
-        print("FOR FRAME ", frame_number)
         if any(key in self.to_find for key in output_count.keys()):
             print("FOUND")
             self.found = True
-        print("------------END OF A FRAME --------------")
 
 
 if __name__ == '__main__':
