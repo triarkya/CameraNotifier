@@ -60,17 +60,21 @@ class VideoDetector:
     """
     def run_detection(self):
         splitted_filepath = self.filepath.split("/")
+        output_filepath = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection"
 
         # filepath for videofile with enabled object detection
         new_path = self.video_detector.detectObjectsFromVideo(
             input_file_path=self.filepath,
             minimum_percentage_probability=40,
             log_progress=True,
-            output_file_path="/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection",
+            output_file_path=output_filepath,
             per_frame_function=self.forFrame
         )
 
         print(new_path)
+        if not self.found:
+            os.remove(output_filepath)
+
 
 
     def detect_and_convert(self):
@@ -81,13 +85,16 @@ class VideoDetector:
         if detection_settings["DeleteInitialFile"]:
             os.remove(self.filepath)
 
-        # convert detection file and remove non-detection file
-        splitted_filepath = self.filepath.split("/")
-        self.run_convert_avi("/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.avi", remove=True)
-        self.converted_detection_path = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.mp4"
+        if self.found:
+            # convert detection file and remove non-detection file
+            splitted_filepath = self.filepath.split("/")
+            self.run_convert_avi("/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.avi", remove=True)
+            self.converted_detection_path = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.mp4"
+
         return self.converted_detection_path
 
 
+    # method for each frame
     def forFrame(self, frame_number, output_array, output_count):
         if any(key in self.to_find for key in output_count.keys()):
             print("FOUND")

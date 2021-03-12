@@ -38,8 +38,6 @@ def run_detection():
                     Notification.send_notification(filepath=final_file)
                 except Exception as e:
                     print(e)
-            else:
-                os.remove(final_file)
 
 
 if __name__ == '__main__':
