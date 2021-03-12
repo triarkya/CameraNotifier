@@ -73,7 +73,7 @@ class VideoDetector:
 
         print(new_path)
         if not self.found:
-            os.remove(output_filepath)
+            os.remove(output_filepath + ".avi")
 
 
 
