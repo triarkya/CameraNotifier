@@ -1,7 +1,8 @@
 from imageai.Detection import VideoObjectDetection
-from converter import Converter
 import os
+import time
 import json
+import utilities
 
 
 # Settings
@@ -13,6 +14,7 @@ with open("settings.json", "r") as settings:
 class VideoDetector:
     def __init__(self, filepath):
         self.filepath = filepath
+        self.creation_date = time.ctime(os.path.getctime(self.filepath))
         self.video_detector = VideoObjectDetection()
 
         self.video_detector.setModelTypeAsYOLOv3()
@@ -21,44 +23,14 @@ class VideoDetector:
         self.converted_detection_path = ""
         self.to_find = ["person"]
         self.found = False
-
-
-    """
-    converts .avi file to .mp4
-    optional: removes .avi file after conversion
-    """
-    def run_convert_avi(self, filepath, remove=False):
-        converter = Converter()
-
-        # first convert to mp4 and remove ".avi" between
-        convert = converter.convert(filepath, filepath[:-4] + '.mp4', {
-            'format': 'mp4',
-            'video': {
-                'codec': 'h264',
-                'width': 1280,
-                'height': 720,
-                'fps': 5
-            }
-        })
-        try:
-            for part in convert:
-                print(part)
-
-        except Exception as e:
-            print(e)
-            # add some additional verbose stuff/notification here
-            # sometimes converter.ConverterError: Zero-length media occurs
-
-        if remove:
-            # then delete old file
-            os.remove(filepath)
+        print(self.creation_date)
 
 
     """
     run object detection on object filepath
     currently: car/person
     """
-    def run_detection(self):
+    def run_video_detection(self):
         splitted_filepath = self.filepath.split("/")
         output_filepath = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection"
 
@@ -70,8 +42,9 @@ class VideoDetector:
             output_file_path=output_filepath,
             per_frame_function=self.forFrame
         )
-
         print(new_path)
+
+        # remove file if nothing relevant found
         if not self.found:
             os.remove(output_filepath + ".avi")
 
@@ -79,7 +52,7 @@ class VideoDetector:
 
     def detect_and_convert(self):
         # first detect from .avi file
-        self.run_detection()
+        self.run_video_detection()
 
         # delete old video file
         if detection_settings["DeleteInitialFile"]:
@@ -88,7 +61,7 @@ class VideoDetector:
         if self.found:
             # convert detection file and remove non-detection file
             splitted_filepath = self.filepath.split("/")
-            self.run_convert_avi("/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.avi", remove=True)
+            utilities.avi_to_mp4("/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.avi", remove=True)
             self.converted_detection_path = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.mp4"
 
         return self.converted_detection_path
