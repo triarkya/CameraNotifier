@@ -25,8 +25,10 @@ def run_detection():
             # send file and remove afterwards
             if vd.found:
                 try:
-                    Notification.send_message(f"Found: {vd.found}")
-                    Notification.send_notification(filepath=final_file)
+                    Notification.send_notification(
+                        filepath=final_file,
+                        notification_text=vd.creation_date
+                    )
                 except Exception as e:
                     print(e)
 
@@ -37,4 +39,3 @@ if __name__ == '__main__':
 
     while True:
         run_detection()
-        break

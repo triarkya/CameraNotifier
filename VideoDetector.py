@@ -14,13 +14,14 @@ with open("settings.json", "r") as settings:
 class VideoDetector:
     def __init__(self, filepath):
         self.filepath = filepath
+        self.converted_detection_path = ""
         self.creation_date = time.ctime(os.path.getctime(self.filepath))
-        self.video_detector = VideoObjectDetection()
 
+        # set parameters for video detection
+        self.video_detector = VideoObjectDetection()
         self.video_detector.setModelTypeAsYOLOv3()
         self.video_detector.setModelPath("yolo.h5")
         self.video_detector.loadModel(detection_speed="fastest")
-        self.converted_detection_path = ""
         self.to_find = ["person"]
         self.found = False
         print(self.creation_date)
@@ -49,7 +50,10 @@ class VideoDetector:
             os.remove(output_filepath + ".avi")
 
 
-
+    '''
+    1. Run Video Detection
+    2. Run Conversion of Detection File
+    '''
     def detect_and_convert(self):
         # first detect from .avi file
         self.run_video_detection()
@@ -58,8 +62,8 @@ class VideoDetector:
         if detection_settings["DeleteInitialFile"]:
             os.remove(self.filepath)
 
+        # convert detection file and remove non-detection file if objects detected
         if self.found:
-            # convert detection file and remove non-detection file
             splitted_filepath = self.filepath.split("/")
             utilities.avi_to_mp4("/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.avi", remove=True)
             self.converted_detection_path = "/".join(splitted_filepath[:-1]) + "/converted/" + splitted_filepath[-1] + "detection.mp4"
@@ -67,7 +71,9 @@ class VideoDetector:
         return self.converted_detection_path
 
 
-    # method for each frame
+    '''
+    method for each frame:
+    '''
     def forFrame(self, frame_number, output_array, output_count):
         if any(key in self.to_find for key in output_count.keys()):
             print("FOUND")

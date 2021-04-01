@@ -11,12 +11,13 @@ with open("settings.json", "r") as settings:
     tgb_chat = all_settings["NotificationSettings"]["Telegram_Chat_ID"]
 
 
-def send_notification(filepath):
+def send_notification(filepath, notification_text):
     tgb = telegram.Bot(token=tgb_token)
     try:
         tgb.send_video(
             tgb_chat,
             open(filepath, "rb"),
+            caption=notification_text
         )
 
     # any more elegant possibility to catch all network related errors?
