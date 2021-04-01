@@ -73,6 +73,7 @@ class VideoDetector:
 
     '''
     method for each frame:
+    - set found to "true" if objects found
     '''
     def forFrame(self, frame_number, output_array, output_count):
         if any(key in self.to_find for key in output_count.keys()):
